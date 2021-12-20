@@ -25,7 +25,7 @@ async function main() {
   });
 }
 
-function defineRoutes() {
+const defineRoutes = () => {
   app.get("/", (req, res) => {
     res.sendFile(__dirname + "/views/index.html");
   });
@@ -90,4 +90,4 @@ function defineRoutes() {
       next(error);
     }
   });
-}
+};

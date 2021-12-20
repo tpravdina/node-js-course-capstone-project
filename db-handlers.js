@@ -7,8 +7,8 @@ require("dotenv").config();
 const DB_PATH = path.join(__dirname, "users-exercises.db");
 const DB_SQL_PATH = path.join(__dirname, "users-exercises-db.sql");
 
-var myDB = new sqlite3.Database(DB_PATH);
-var SQL3 = {
+const myDB = new sqlite3.Database(DB_PATH);
+const SQL3 = {
   run(...args) {
     return new Promise((resolve, reject) => {
       myDB.run(...args, function onResult(err) {
@@ -28,7 +28,7 @@ const dbInit = async () => {
 };
 
 const getAllUsers = async () => {
-  var result = await SQL3.all(
+  const result = await SQL3.all(
     `
       SELECT
         *
@@ -145,6 +145,7 @@ const insertOrLookupUser = async (username) => {
 };
 
 const insertExercise = async (_id, description, duration, date) => {
+  const dateToInsert = date ? date : new Date().toISOString().slice(0, 10);
   let result = await SQL3.run(
     `
       INSERT INTO
@@ -152,7 +153,7 @@ const insertExercise = async (_id, description, duration, date) => {
       VALUES
         (?, ?, ?, ?)
     `,
-    [_id, description, duration, date]
+    [_id, description, duration, dateToInsert]
   );
   if (!result || !result.lastID) {
     throw new Error(`Can't create an exercise.`);
@@ -161,7 +162,7 @@ const insertExercise = async (_id, description, duration, date) => {
     _id: _id,
     description: description,
     duration: duration,
-    date: date,
+    date: dateToInsert,
   };
   return exerciseObj;
 };
