@@ -6,8 +6,8 @@ const showStartPage = (req, res) => {
 
 const createUser = async (req, res, next) => {
   try {
-    const result = await db.insertOrLookupUser(req.body.username);
-    res.end(JSON.stringify(result));
+    const user = await db.insertOrLookupUser(req.body.username);
+    res.json(user);
   } catch (error) {
     next(error);
   }
@@ -16,7 +16,7 @@ const createUser = async (req, res, next) => {
 const getAllUsers = async (req, res, next) => {
   try {
     const users = await db.getAllUsers();
-    res.end(JSON.stringify(users));
+    res.json(users);
   } catch (error) {
     next(error);
   }
@@ -33,7 +33,7 @@ const createExercise = async (req, res, next) => {
         req.body.date
       );
       user.exercise = exercise;
-      res.end(JSON.stringify(user));
+      res.json(user);
     } catch (error) {
       next(error);
     }
@@ -56,7 +56,7 @@ const getExercisesByUserId = async (req, res, next) => {
       const count = exercises.length;
       user.count = count;
       user.exercises = exercises;
-      res.end(JSON.stringify(user));
+      res.json(user);
     } catch (error) {
       next(error);
     }
