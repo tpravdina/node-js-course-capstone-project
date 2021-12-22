@@ -110,7 +110,7 @@ const getExercisesByUserId = async (id, limit, from, to) => {
   }
 
   let result = await SQL3.all(queryStr, queryParams);
-  if (!result || result.length === 0) {
+  if (!result) {
     throw new Error("No exercises was found");
   }
   return result;
