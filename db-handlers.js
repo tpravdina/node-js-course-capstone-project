@@ -37,7 +37,7 @@ const getAllUsers = async () => {
     `
   );
   if (!result) {
-    throw new Error("Error: Can not get users.");
+    throw new Error("Can not get users.");
   }
   return result;
 };
@@ -84,7 +84,44 @@ const getUserByUsername = async (username) => {
   };
 };
 
-const getExercisesByUserId = async (id, limit, from, to) => {
+const getCountOfUserExercises = async (id) => {
+  let allExercises = await SQL3.all(
+    `
+    SELECT
+      description, duration, date
+	  FROM
+      exercises
+	  WHERE
+      _id = ?
+	  `,
+    id
+  );
+  if (!allExercises) {
+    return 0;
+  }
+  const totalCount = allExercises.length;
+  return totalCount;
+};
+
+const getAllUserExercises = async (id) => {
+  let allExercises = await SQL3.all(
+    `
+    SELECT
+      description, duration, date
+	  FROM
+      exercises
+	  WHERE
+      _id = ?
+	  `,
+    id
+  );
+  if (!allExercises) {
+    throw new Error(`Can't find user exercises.`);
+  }
+  return allExercises;
+};
+
+const getFilteredUserExercises = async (id, limit, from, to) => {
   let queryParams = [];
   let queryStr = `
 	SELECT
@@ -95,6 +132,7 @@ const getExercisesByUserId = async (id, limit, from, to) => {
     _id = ?
 	`;
   queryParams.push(id);
+
   if (from) {
     queryStr += `AND date>?`;
     queryParams.push(from);
@@ -109,11 +147,23 @@ const getExercisesByUserId = async (id, limit, from, to) => {
     queryParams.push(limit);
   }
 
-  let result = await SQL3.all(queryStr, queryParams);
-  if (!result) {
-    throw new Error("No exercises was found");
+  let filteredExercises = await SQL3.all(queryStr, queryParams);
+  if (!filteredExercises) {
+    throw new Error(`Can not find user exercises for this query.`);
   }
-  return result;
+  return filteredExercises;
+};
+
+const getUserLog = async (id, limit, from, to) => {
+  const allUserExercises = await getAllUserExercises(id);
+  const totalCount = allUserExercises.length;
+
+  const userLog = {
+    ...(await getUserById(id)),
+    count: totalCount,
+    exercises: await getFilteredUserExercises(id, limit, from, to),
+  };
+  return userLog;
 };
 
 const insertUser = async (username) => {
@@ -174,5 +224,7 @@ module.exports = {
   insertUser,
   insertOrLookupUser,
   insertExercise,
-  getExercisesByUserId,
+  getFilteredUserExercises,
+  getCountOfUserExercises,
+  getUserLog,
 };

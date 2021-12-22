@@ -7,7 +7,7 @@ const {
   createUser,
   getAllUsers,
   createExercise,
-  getExercisesByUserId,
+  getUserLog,
   showStartPage,
 } = require("./service");
 
@@ -37,5 +37,5 @@ const defineRoutes = () => {
   app.post("/api/users", createUser);
   app.get("/api/users", getAllUsers);
   app.post("/api/users/:_id/exercises", createExercise);
-  app.get("/api/users/:_id/logs", getExercisesByUserId);
+  app.get("/api/users/:_id/logs", getUserLog);
 };

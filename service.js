@@ -42,7 +42,7 @@ const createExercise = async (req, res, next) => {
   }
 };
 
-const getExercisesByUserId = async (req, res, next) => {
+const getUserLog = async (req, res, next) => {
   const id = req.params._id;
 
   const limit = req.query.limit;
@@ -50,16 +50,8 @@ const getExercisesByUserId = async (req, res, next) => {
   const to = req.query.to;
 
   try {
-    const user = await db.getUserById(id);
-    try {
-      const exercises = await db.getExercisesByUserId(id, limit, from, to);
-      const count = exercises.length;
-      user.count = count;
-      user.exercises = exercises;
-      res.json(user);
-    } catch (error) {
-      next(error);
-    }
+    const user = await db.getUserLog(id, limit, from, to);
+    res.json(user);
   } catch (error) {
     next(error);
   }
@@ -69,6 +61,6 @@ module.exports = {
   createUser,
   getAllUsers,
   createExercise,
-  getExercisesByUserId,
+  getUserLog,
   showStartPage,
 };
