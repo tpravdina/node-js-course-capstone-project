@@ -27,145 +27,6 @@ const dbInit = async () => {
   await SQL3.exec(initSQL);
 };
 
-const getAllUsers = async () => {
-  const result = await SQL3.all(
-    `
-      SELECT
-        *
-      FROM
-        users
-    `
-  );
-  if (!result) {
-    throw new Error("Can not get users.");
-  }
-  return result;
-};
-
-const getUserById = async (id) => {
-  let result = await SQL3.get(
-    `
-    SELECT
-      _id, username
-    FROM
-      users
-    WHERE
-      _id = ?
-	`,
-    id
-  );
-  if (!result || !result._id) {
-    throw new Error(`No user exists with id=${id}.`);
-  }
-  return {
-    _id: result._id,
-    username: result.username,
-  };
-};
-
-const getUserByUsername = async (username) => {
-  let result = await SQL3.get(
-    `
-    SELECT
-      _id, username
-    FROM
-      users
-    WHERE
-      username = ?
-	`,
-    username
-  );
-  if (!result || !result._id) {
-    return false;
-  }
-  return {
-    _id: result._id,
-    username: result.username,
-  };
-};
-
-const getCountOfUserExercises = async (id) => {
-  let allExercises = await SQL3.all(
-    `
-    SELECT
-      description, duration, date
-	  FROM
-      exercises
-	  WHERE
-      _id = ?
-	  `,
-    id
-  );
-  if (!allExercises) {
-    return 0;
-  }
-  const totalCount = allExercises.length;
-  return totalCount;
-};
-
-const getAllUserExercises = async (id) => {
-  let allExercises = await SQL3.all(
-    `
-    SELECT
-      description, duration, date
-	  FROM
-      exercises
-	  WHERE
-      _id = ?
-	  `,
-    id
-  );
-  if (!allExercises) {
-    throw new Error(`Can't find user exercises.`);
-  }
-  return allExercises;
-};
-
-const getFilteredUserExercises = async (id, limit, from, to) => {
-  let queryParams = [];
-  let queryStr = `
-	SELECT
-    description, duration, date
-	FROM
-    exercises
-	WHERE
-    _id = ?
-	`;
-  queryParams.push(id);
-
-  if (from) {
-    queryStr += `AND date>?`;
-    queryParams.push(from);
-  }
-  if (to) {
-    queryStr += `AND date<?`;
-    queryParams.push(to);
-  }
-  queryStr += `ORDER BY date `;
-  if (limit) {
-    queryStr += `LIMIT ?`;
-    queryParams.push(limit);
-  }
-
-  let filteredExercises = await SQL3.all(queryStr, queryParams);
-  if (!filteredExercises) {
-    throw new Error(`Can not find user exercises for this query.`);
-  }
-  return filteredExercises;
-};
-
-const getUserLog = async (id, limit, from, to) => {
-  const allUserExercises = await getAllUserExercises(id);
-  const totalCount = allUserExercises.length;
-
-  const userLog = {
-    ...(await getUserById(id)),
-    count: totalCount,
-    exercises: await getFilteredUserExercises(id, limit, from, to),
-  };
-  return userLog;
-};
-
 const insertUser = async (username) => {
   let result = await SQL3.run(
     `
@@ -217,14 +78,99 @@ const insertExercise = async (_id, description, duration, date) => {
   return exerciseObj;
 };
 
+const getAllUsers = async () => {
+  const result = await SQL3.all(
+    `
+      SELECT
+        *
+      FROM
+        users
+    `
+  );
+  if (!result) {
+    throw new Error("Can not get users.");
+  }
+  return result;
+};
+
+const getUserByUsername = async (username) => {
+  let result = await SQL3.get(
+    `
+    SELECT
+      _id, username
+    FROM
+      users
+    WHERE
+      username = ?
+	`,
+    username
+  );
+  if (!result || !result._id) {
+    return false;
+  }
+  return {
+    _id: result._id,
+    username: result.username,
+  };
+};
+
+const getFilteredUserExercises = async (id, from, to) => {
+  let queryParams = [];
+  let queryStr = `
+	SELECT
+      users._id, users.username, exercises.description, exercises.duration, exercises.date
+	  FROM
+      users JOIN exercises ON users._id = exercises._id
+    WHERE
+      exercises._id = ?
+	`;
+  queryParams.push(id);
+
+  if (from) {
+    queryStr += `AND exercises.date>?`;
+    queryParams.push(from);
+  }
+  if (to) {
+    queryStr += `AND exercises.date<?`;
+    queryParams.push(to);
+  }
+  queryStr += `ORDER BY exercises.date `;
+
+  let filteredExercises = await SQL3.all(queryStr, queryParams);
+
+  if (!filteredExercises) {
+    throw new Error(`Can not find user exercises for this query.`);
+  }
+  return filteredExercises;
+};
+
+const getUserLog = async (id, limit, from, to) => {
+  let exercises = await getFilteredUserExercises(id, from, to);
+  const totalCount = exercises.length;
+  if (limit) {
+    exercises = exercises.slice(0, limit);
+  }
+
+  const userLog = {
+    _id: exercises[0]._id,
+    username: exercises[0].username,
+    count: totalCount,
+    exercises: exercises.map((elem) => {
+      return {
+        description: elem.description,
+        duration: elem.duration,
+        date: elem.date,
+      };
+    }),
+  };
+  return userLog;
+};
+
 module.exports = {
   dbInit,
-  getAllUsers,
-  getUserById,
   insertUser,
   insertOrLookupUser,
   insertExercise,
-  getFilteredUserExercises,
-  getCountOfUserExercises,
+  getAllUsers,
   getUserLog,
 };

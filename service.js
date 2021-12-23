@@ -13,15 +13,6 @@ const createUser = async (req, res, next) => {
   }
 };
 
-const getAllUsers = async (req, res, next) => {
-  try {
-    const users = await db.getAllUsers();
-    res.json(users);
-  } catch (error) {
-    next(error);
-  }
-};
-
 const createExercise = async (req, res, next) => {
   try {
     const user = await db.getUserById(req.body[":_id"]);
@@ -42,6 +33,15 @@ const createExercise = async (req, res, next) => {
   }
 };
 
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await db.getAllUsers();
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getUserLog = async (req, res, next) => {
   const id = req.params._id;
 
@@ -50,17 +50,17 @@ const getUserLog = async (req, res, next) => {
   const to = req.query.to;
 
   try {
-    const user = await db.getUserLog(id, limit, from, to);
-    res.json(user);
+    const userLog = await db.getUserLog(id, limit, from, to);
+    res.json(userLog);
   } catch (error) {
     next(error);
   }
 };
 
 module.exports = {
-  createUser,
-  getAllUsers,
-  createExercise,
-  getUserLog,
   showStartPage,
+  createUser,
+  createExercise,
+  getAllUsers,
+  getUserLog,
 };
