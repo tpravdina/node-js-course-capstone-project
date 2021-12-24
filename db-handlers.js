@@ -114,54 +114,65 @@ const getUserByUsername = async (username) => {
   };
 };
 
-const getFilteredUserExercises = async (id, from, to) => {
+const getUserById = async (id) => {
+  let result = await SQL3.get(
+    `
+    SELECT
+      _id, username
+    FROM
+      users
+    WHERE
+      _id = ?
+	`,
+    id
+  );
+  if (!result || !result._id) {
+    throw new Error(`No user exists with id=${id}.`);
+  }
+  return {
+    _id: result._id,
+    username: result.username,
+  };
+};
+
+const getFilteredExercisesByUserId = async (id, from, to) => {
   let queryParams = [];
   let queryStr = `
 	SELECT
-      users._id, users.username, exercises.description, exercises.duration, exercises.date
-	  FROM
-      users JOIN exercises ON users._id = exercises._id
-    WHERE
-      exercises._id = ?
+    description, duration, date
+	FROM
+    exercises
+	WHERE
+    _id = ?
 	`;
   queryParams.push(id);
-
   if (from) {
-    queryStr += `AND exercises.date>?`;
+    queryStr += `AND date>?`;
     queryParams.push(from);
   }
   if (to) {
-    queryStr += `AND exercises.date<?`;
+    queryStr += `AND date<?`;
     queryParams.push(to);
   }
-  queryStr += `ORDER BY exercises.date `;
 
-  let filteredExercises = await SQL3.all(queryStr, queryParams);
-
-  if (!filteredExercises) {
-    throw new Error(`Can not find user exercises for this query.`);
+  let result = await SQL3.all(queryStr, queryParams);
+  if (!result) {
+    return [];
   }
-  return filteredExercises;
+  return result;
 };
 
 const getUserLog = async (id, limit, from, to) => {
-  let exercises = await getFilteredUserExercises(id, from, to);
+  let user = await getUserById(id);
+  let exercises = await getFilteredExercisesByUserId(id, from, to);
   const totalCount = exercises.length;
   if (limit) {
     exercises = exercises.slice(0, limit);
   }
-
   const userLog = {
-    _id: exercises[0]._id,
-    username: exercises[0].username,
+    ...user,
     count: totalCount,
-    exercises: exercises.map((elem) => {
-      return {
-        description: elem.description,
-        duration: elem.duration,
-        date: elem.date,
-      };
-    }),
+    exercises: exercises,
   };
   return userLog;
 };
@@ -172,5 +183,6 @@ module.exports = {
   insertOrLookupUser,
   insertExercise,
   getAllUsers,
+  getUserById,
   getUserLog,
 };
