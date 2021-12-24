@@ -37,8 +37,8 @@ const insertUser = async (username) => {
     `,
     username
   );
-  if (!result || !result.lastID) {
-    throw new Error("Can't insert the user.");
+  if (!result) {
+    return null;
   }
   let userObj = {
     _id: result.lastID,
@@ -50,7 +50,7 @@ const insertUser = async (username) => {
 const insertOrLookupUser = async (username) => {
   let result = await getUserByUsername(username);
   if (result) {
-    throw new Error(`User with username "${username}" already exist.`);
+    return null;
   }
   return await insertUser(username);
 };
@@ -66,8 +66,8 @@ const insertExercise = async (_id, description, duration, date) => {
     `,
     [_id, description, duration, dateToInsert]
   );
-  if (!result || !result.lastID) {
-    throw new Error(`Can't create an exercise.`);
+  if (!result) {
+    return null;
   }
   let exerciseObj = {
     _id: _id,
@@ -88,7 +88,7 @@ const getAllUsers = async () => {
     `
   );
   if (!result) {
-    throw new Error("Can not get users.");
+    return null;
   }
   return result;
 };
@@ -105,8 +105,8 @@ const getUserByUsername = async (username) => {
 	`,
     username
   );
-  if (!result || !result._id) {
-    return false;
+  if (!result) {
+    return null;
   }
   return {
     _id: result._id,
@@ -126,8 +126,8 @@ const getUserById = async (id) => {
 	`,
     id
   );
-  if (!result || !result._id) {
-    throw new Error(`No user exists with id=${id}.`);
+  if (!result) {
+    return null;
   }
   return {
     _id: result._id,
@@ -135,7 +135,7 @@ const getUserById = async (id) => {
   };
 };
 
-const getFilteredExercisesByUserId = async (id, from, to) => {
+const getExercisesByUserIdFromTo = async (id, from, to) => {
   let queryParams = [];
   let queryStr = `
 	SELECT
@@ -162,21 +162,6 @@ const getFilteredExercisesByUserId = async (id, from, to) => {
   return result;
 };
 
-const getUserLog = async (id, limit, from, to) => {
-  let user = await getUserById(id);
-  let exercises = await getFilteredExercisesByUserId(id, from, to);
-  const totalCount = exercises.length;
-  if (limit) {
-    exercises = exercises.slice(0, limit);
-  }
-  const userLog = {
-    ...user,
-    count: totalCount,
-    exercises: exercises,
-  };
-  return userLog;
-};
-
 module.exports = {
   dbInit,
   insertUser,
@@ -184,5 +169,5 @@ module.exports = {
   insertExercise,
   getAllUsers,
   getUserById,
-  getUserLog,
+  getExercisesByUserIdFromTo,
 };
