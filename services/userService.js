@@ -32,7 +32,6 @@ const createUser = async (req, res, next) => {
       throw new errorService.CustomError(404, `Can not create the user.`);
     }
     res.json(user);
-    next();
   } catch (error) {
     next(error);
   }
@@ -45,7 +44,6 @@ const getAllUsers = async (req, res, next) => {
       throw new errorService.CustomError(404, "Can not get users.");
     }
     res.json(users);
-    next();
   } catch (error) {
     next(error);
   }
@@ -54,7 +52,7 @@ const getAllUsers = async (req, res, next) => {
 const getUserLog = async (req, res, next) => {
   const user = req.user;
 
-  const id = req.params._id;
+  const id = req.params.userId;
 
   const limit = req.query.limit;
   const from = req.query.from;
@@ -75,7 +73,6 @@ const getUserLog = async (req, res, next) => {
     exercises: exercises,
   };
   res.json(userLog);
-  next();
 };
 
 module.exports = { loadUserById, createUser, getAllUsers, getUserLog };
