@@ -8,14 +8,6 @@ const errorService = require("./services/errorService");
 const exerciseService = require("./services/exerciseService");
 const validationService = require("./services/validationService");
 
-const {
-  createUser,
-  getAllUsers,
-  createExercise,
-  getUserLog,
-  showStartPage,
-} = require("./service");
-
 const PORT = 3000;
 
 main();
@@ -40,8 +32,8 @@ async function main() {
     userService.loadUserById
   );
   app.post("/api/users/:userId/exercises", exerciseService.createExercise);
-  app.get("/api/users/:_id/logs", validationService.validateParams);
-  app.get("/api/users/:_id/logs", userService.getUserLog);
+  app.get("/api/users/:userId/logs", validationService.validateParams);
+  app.get("/api/users/:userId/logs", userService.getUserLog);
 
   app.use(() => {
     throw new errorService.CustomError(404, "Page not found");
