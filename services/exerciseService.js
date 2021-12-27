@@ -5,7 +5,7 @@ const createExercise = async (req, res, next) => {
   const user = await req.user;
   try {
     const exercise = await db.insertExercise(
-      req.body.userId,
+      req.body[":_id"],
       req.body.description,
       req.body.duration,
       req.body.date
@@ -15,7 +15,6 @@ const createExercise = async (req, res, next) => {
     }
     user.exercise = exercise;
     res.json(user);
-    next();
   } catch (error) {
     next(error);
   }
