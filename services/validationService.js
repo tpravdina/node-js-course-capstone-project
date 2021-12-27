@@ -1,7 +1,7 @@
 const errorService = require("./errorService");
 
 const validateParams = (req, res, next) => {
-  const id = req.params._id;
+  const id = req.params.userId;
 
   const limit = req.query.limit;
   const from = req.query.from;
