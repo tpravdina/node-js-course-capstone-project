@@ -152,29 +152,32 @@ const getUserById = async (id) => {
 
 const getUserWithExercisesByIdFromToLimit = async (id, from, to, limit) => {
   let queryParams = [];
-  let queryStr = `
-  SELECT
-    users.id, users.username, exercises.description, exercises.duration, exercises.date
-  FROM
-    users LEFT JOIN exercises ON users.id = exercises.user_id
-  WHERE
-    users.id=?
-  `;
+  let subqueryStr = "SELECT * FROM exercises WHERE user_id=?";
   queryParams.push(id);
   if (from) {
-    queryStr += `AND exercises.date>?`;
+    subqueryStr += `AND exercises.date>?`;
     queryParams.push(from);
   }
   if (to) {
-    queryStr += `AND exercises.date<?`;
+    subqueryStr += `AND exercises.date<?`;
     queryParams.push(to);
   }
   if (limit) {
-    queryStr += `LIMIT ?`;
+    subqueryStr += `LIMIT ?`;
     queryParams.push(limit);
   }
-
+  let queryStr = `
+    SELECT
+      users.id, users.username, exercises.description, exercises.duration, exercises.date
+    FROM
+    (${subqueryStr}) AS exercises LEFT JOIN  users ON users.id = exercises.user_id
+  `;
+  console.log(queryStr);
+  console.log(queryParams);
   let result = await SQL3.all(queryStr, queryParams);
+  let result2 = await SQL3.all(subqueryStr, queryParams);
+  console.log(result2);
+  console.log(result);
   if (!result) {
     return [];
   }
@@ -187,17 +190,17 @@ const getCountOfExercisesByUserIdFromTo = async (id, from, to) => {
   SELECT
     COUNT(1)
   FROM
-    users LEFT JOIN exercises ON users.id = exercises.user_id
+    exercises
   WHERE
-    users.id=?
+    user_id=?
   `;
   queryParams.push(id);
   if (from) {
-    queryStr += `AND exercises.date>?`;
+    queryStr += `AND date>?`;
     queryParams.push(from);
   }
   if (to) {
-    queryStr += `AND exercises.date<?`;
+    queryStr += `AND date<?`;
     queryParams.push(to);
   }
 
