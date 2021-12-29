@@ -93,6 +93,21 @@ const getAllUsers = async () => {
   return result;
 };
 
+const getAllExercises = async () => {
+  const result = await SQL3.all(
+    `
+      SELECT
+        *
+      FROM
+      exercises
+    `
+  );
+  if (!result) {
+    return null;
+  }
+  return result;
+};
+
 const getUserByUsername = async (username) => {
   let result = await SQL3.get(
     `
@@ -168,6 +183,7 @@ module.exports = {
   insertOrLookupUser,
   insertExercise,
   getAllUsers,
+  getAllExercises,
   getUserById,
   getExercisesByUserIdFromTo,
 };
