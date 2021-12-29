@@ -172,12 +172,7 @@ const getUserWithExercisesByIdFromToLimit = async (id, from, to, limit) => {
     FROM
     (${subqueryStr}) AS exercises LEFT JOIN  users ON users.id = exercises.user_id
   `;
-  console.log(queryStr);
-  console.log(queryParams);
   let result = await SQL3.all(queryStr, queryParams);
-  let result2 = await SQL3.all(subqueryStr, queryParams);
-  console.log(result2);
-  console.log(result);
   if (!result) {
     return [];
   }
