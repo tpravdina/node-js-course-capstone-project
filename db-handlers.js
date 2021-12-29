@@ -41,7 +41,7 @@ const insertUser = async (username) => {
     return null;
   }
   let userObj = {
-    _id: result.lastID,
+    id: result.lastID,
     username: username,
   };
   return userObj;
@@ -55,22 +55,22 @@ const insertOrLookupUser = async (username) => {
   return await insertUser(username);
 };
 
-const insertExercise = async (_id, description, duration, date) => {
+const insertExercise = async (user_id, description, duration, date) => {
   const dateToInsert = date ? date : new Date().toISOString().slice(0, 10);
   let result = await SQL3.run(
     `
       INSERT INTO
-        exercises (_id, description, duration, date)
+        exercises (user_id, description, duration, date)
       VALUES
         (?, ?, ?, ?)
     `,
-    [_id, description, duration, dateToInsert]
+    [user_id, description, duration, dateToInsert]
   );
   if (!result) {
     return null;
   }
   let exerciseObj = {
-    _id: _id,
+    user_id: user_id,
     description: description,
     duration: duration,
     date: dateToInsert,
@@ -112,7 +112,7 @@ const getUserByUsername = async (username) => {
   let result = await SQL3.get(
     `
     SELECT
-      _id, username
+      id, username
     FROM
       users
     WHERE
@@ -124,7 +124,7 @@ const getUserByUsername = async (username) => {
     return null;
   }
   return {
-    _id: result._id,
+    id: result.id,
     username: result.username,
   };
 };
@@ -133,11 +133,11 @@ const getUserById = async (id) => {
   let result = await SQL3.get(
     `
     SELECT
-      _id, username
+      id, username
     FROM
       users
     WHERE
-      _id = ?
+      id = ?
 	`,
     id
   );
@@ -145,7 +145,7 @@ const getUserById = async (id) => {
     return null;
   }
   return {
-    _id: result._id,
+    id: result.id,
     username: result.username,
   };
 };
@@ -158,7 +158,7 @@ const getExercisesByUserIdFromTo = async (id, from, to) => {
 	FROM
     exercises
 	WHERE
-    _id = ?
+    user_id = ?
 	`;
   queryParams.push(id);
   if (from) {
@@ -177,6 +177,23 @@ const getExercisesByUserIdFromTo = async (id, from, to) => {
   return result;
 };
 
+const getUserWithExercisesById = async (id) => {
+  let result = await SQL3.all(
+    `SELECT
+      users.id, users.username, exercises.description, exercises.duration, exercises.date
+	  FROM
+      users LEFT JOIN exercises ON users.id = exercises.user_id
+    WHERE
+    users.id=?
+	`,
+    id
+  );
+  if (!result) {
+    return null;
+  }
+  return result;
+};
+
 module.exports = {
   dbInit,
   insertUser,
@@ -186,4 +203,5 @@ module.exports = {
   getAllExercises,
   getUserById,
   getExercisesByUserIdFromTo,
+  getUserWithExercisesById,
 };
