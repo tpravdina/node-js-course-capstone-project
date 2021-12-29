@@ -20,8 +20,5 @@ const createExercise = async (req, res, next) => {
   }
 };
 
-const getExercisesByUserIdFromTo = async (id, from, to) => {
-  return await db.getExercisesByUserIdFromTo(id, from, to);
-};
 
-module.exports = { createExercise, getExercisesByUserIdFromTo };
+module.exports = { createExercise };

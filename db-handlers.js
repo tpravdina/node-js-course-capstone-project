@@ -150,24 +150,28 @@ const getUserById = async (id) => {
   };
 };
 
-const getExercisesByUserIdFromTo = async (id, from, to) => {
+const getUserWithExercisesByIdFromToLimit = async (id, from, to, limit) => {
   let queryParams = [];
   let queryStr = `
-	SELECT
-    description, duration, date
-	FROM
-    exercises
-	WHERE
-    user_id = ?
-	`;
+  SELECT
+    users.id, users.username, exercises.description, exercises.duration, exercises.date
+  FROM
+    users LEFT JOIN exercises ON users.id = exercises.user_id
+  WHERE
+    users.id=?
+  `;
   queryParams.push(id);
   if (from) {
-    queryStr += `AND date>?`;
+    queryStr += `AND exercises.date>?`;
     queryParams.push(from);
   }
   if (to) {
-    queryStr += `AND date<?`;
+    queryStr += `AND exercises.date<?`;
     queryParams.push(to);
+  }
+  if (limit) {
+    queryStr += `LIMIT ?`;
+    queryParams.push(limit);
   }
 
   let result = await SQL3.all(queryStr, queryParams);
@@ -177,21 +181,28 @@ const getExercisesByUserIdFromTo = async (id, from, to) => {
   return result;
 };
 
-const getUserWithExercisesById = async (id) => {
-  let result = await SQL3.all(
-    `SELECT
-      users.id, users.username, exercises.description, exercises.duration, exercises.date
-	  FROM
-      users LEFT JOIN exercises ON users.id = exercises.user_id
-    WHERE
+const getCountOfExercisesByUserIdFromTo = async (id, from, to) => {
+  let queryParams = [];
+  let queryStr = `
+  SELECT
+    COUNT(1)
+  FROM
+    users LEFT JOIN exercises ON users.id = exercises.user_id
+  WHERE
     users.id=?
-	`,
-    id
-  );
-  if (!result) {
-    return null;
+  `;
+  queryParams.push(id);
+  if (from) {
+    queryStr += `AND exercises.date>?`;
+    queryParams.push(from);
   }
-  return result;
+  if (to) {
+    queryStr += `AND exercises.date<?`;
+    queryParams.push(to);
+  }
+
+  let result = await SQL3.get(queryStr, queryParams);
+  return result["COUNT(1)"];
 };
 
 module.exports = {
@@ -202,6 +213,6 @@ module.exports = {
   getAllUsers,
   getAllExercises,
   getUserById,
-  getExercisesByUserIdFromTo,
-  getUserWithExercisesById,
+  getUserWithExercisesByIdFromToLimit,
+  getCountOfExercisesByUserIdFromTo,
 };

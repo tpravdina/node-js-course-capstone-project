@@ -1,7 +1,8 @@
 const {
   getAllUsers,
   getAllExercises,
-  getUserWithExercisesById,
+  getUserWithExercisesByIdFromToLimit,
+  getCountOfExercisesByUserIdFromTo,
 } = require("./db-handlers");
 
 const printUsers = async () => {
@@ -16,7 +17,8 @@ const printExercises = async () => {
 
 const printJoin = async () => {
   console.log("Join:");
-  console.table(await getUserWithExercisesById(3));
+  console.log(await getCountOfExercisesByUserIdFromTo(1, "2022-12-29"));
+  console.table(await getUserWithExercisesByIdFromToLimit(1, "", "", 2));
 };
 
 const main = (async () => {

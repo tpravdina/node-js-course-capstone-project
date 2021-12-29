@@ -49,7 +49,7 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-const getUserLog = async (req, res, next) => {
+const getUserLog = async (req, res) => {
   const user = req.user;
 
   const id = req.params.userId;
@@ -58,21 +58,36 @@ const getUserLog = async (req, res, next) => {
   const from = req.query.from;
   const to = req.query.to;
 
-  let exercises = await exerciseService.getExercisesByUserIdFromTo(
+  const totalCount = await db.getCountOfExercisesByUserIdFromTo(id, from, to);
+  const userWithExercisesArray = await db.getUserWithExercisesByIdFromToLimit(
     id,
     from,
-    to
+    to,
+    limit
   );
-  const totalCount = exercises.length;
-  if (limit) {
-    exercises = exercises.slice(0, limit);
-  }
+  const exercises =
+    userWithExercisesArray.length !== 0 && userWithExercisesArray[0].description
+      ? userWithExercisesArray.map((elem) => {
+          return {
+            description: elem.description,
+            duration: elem.duration,
+            date: elem.date,
+          };
+        })
+      : [];
   const userLog = {
-    ...user,
+    id: user.id,
+    username: user.username,
     count: totalCount,
     exercises: exercises,
   };
   res.json(userLog);
 };
 
-module.exports = { loadUserById, createUser, getAllUsers, getUserLog };
+module.exports = {
+  loadUserById,
+  createUser,
+  getAllUsers,
+  getUserLog,
+  getUserLog,
+};
