@@ -150,33 +150,37 @@ const getUserById = async (id) => {
   };
 };
 
-const getUserWithExercisesByIdFromToLimit = async (id, from, to, limit) => {
+const getExercisesByUserIdFromToLimit = async (id, from, to, limit) => {
   let queryParams = [];
-  let subqueryStr = "SELECT * FROM exercises WHERE user_id=?";
+  let queryStr = `
+	SELECT
+    description, duration, date
+	FROM
+    exercises
+	WHERE
+    user_id = ?
+	`;
   queryParams.push(id);
+
   if (from) {
-    subqueryStr += `AND exercises.date>?`;
+    queryStr += `AND date>?`;
     queryParams.push(from);
   }
   if (to) {
-    subqueryStr += `AND exercises.date<?`;
+    queryStr += `AND date<?`;
     queryParams.push(to);
   }
+  queryStr += `ORDER BY date `;
   if (limit) {
-    subqueryStr += `LIMIT ?`;
+    queryStr += `LIMIT ?`;
     queryParams.push(limit);
   }
-  let queryStr = `
-    SELECT
-      users.id, users.username, exercises.description, exercises.duration, exercises.date
-    FROM
-    (${subqueryStr}) AS exercises LEFT JOIN  users ON users.id = exercises.user_id
-  `;
-  let result = await SQL3.all(queryStr, queryParams);
-  if (!result) {
+
+  let filteredExercises = await SQL3.all(queryStr, queryParams);
+  if (!filteredExercises) {
     return [];
   }
-  return result;
+  return filteredExercises;
 };
 
 const getCountOfExercisesByUserIdFromTo = async (id, from, to) => {
@@ -211,6 +215,6 @@ module.exports = {
   getAllUsers,
   getAllExercises,
   getUserById,
-  getUserWithExercisesByIdFromToLimit,
   getCountOfExercisesByUserIdFromTo,
+  getExercisesByUserIdFromToLimit,
 };

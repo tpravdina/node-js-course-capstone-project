@@ -59,25 +59,14 @@ const getUserLog = async (req, res) => {
   const to = req.query.to;
 
   const totalCount = await db.getCountOfExercisesByUserIdFromTo(id, from, to);
-  const userWithExercisesArray = await db.getUserWithExercisesByIdFromToLimit(
+  const exercises = await db.getExercisesByUserIdFromToLimit(
     id,
     from,
     to,
     limit
   );
-  const exercises =
-    userWithExercisesArray.length !== 0 && userWithExercisesArray[0].description
-      ? userWithExercisesArray.map((elem) => {
-          return {
-            description: elem.description,
-            duration: elem.duration,
-            date: elem.date,
-          };
-        })
-      : [];
   const userLog = {
-    id: user.id,
-    username: user.username,
+    ...user,
     count: totalCount,
     exercises: exercises,
   };
@@ -88,6 +77,5 @@ module.exports = {
   loadUserById,
   createUser,
   getAllUsers,
-  getUserLog,
   getUserLog,
 };

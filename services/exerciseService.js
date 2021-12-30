@@ -20,5 +20,4 @@ const createExercise = async (req, res, next) => {
   }
 };
 
-
 module.exports = { createExercise };
