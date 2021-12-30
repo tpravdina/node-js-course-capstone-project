@@ -15,14 +15,7 @@ const printExercises = async () => {
   console.table(await getAllExercises());
 };
 
-const printJoin = async () => {
-  console.log("Join:");
-  console.log(await getCountOfExercisesByUserIdFromTo(1, "2022-12-29"));
-  console.table(await getUserWithExercisesByIdFromToLimit(1, "", "", 2));
-};
-
 const main = (async () => {
   await printUsers();
   await printExercises();
-  await printJoin();
 })();

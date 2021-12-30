@@ -5,7 +5,7 @@ const createExercise = async (req, res, next) => {
   const user = await req.user;
   try {
     const exercise = await db.insertExercise(
-      req.body[":_id"],
+      req.params.userId,
       req.body.description,
       req.body.duration,
       req.body.date
