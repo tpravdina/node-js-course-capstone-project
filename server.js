@@ -31,8 +31,9 @@ async function main() {
     ["/api/users/:userId/exercises", "/api/users/:userId/logs"],
     userService.loadUserById
   );
+  app.use("/api/users/:userId/exercises", validationService.validateExercise);
   app.post("/api/users/:userId/exercises", exerciseService.createExercise);
-  app.get("/api/users/:userId/logs", validationService.validateParams);
+  app.get("/api/users/:userId/logs", validationService.validateFilterParams);
   app.get("/api/users/:userId/logs", userService.getUserLog);
 
   app.use(() => {
